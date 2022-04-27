@@ -1,21 +1,54 @@
 package com.diego.helpdesk.domain;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
 import com.diego.helpdesk.domain.enums.Perfil;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
-public abstract class Pessoa {
+@Entity
+public abstract class Pessoa implements Serializable {
+    // Serializable serve pra criar uma sequencia de bytes para que possam ser
+    // trafegados em rede e armazenados em memoria
+    private static final long serialVersionUID = 1L;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Geracao dessa chave primaria sera do banco, para cada objeto
+                                                        // o banco gera um id diferente
     protected Integer id;
     protected String nome;
+
+    @Column(unique = true) // informando coluna unica no banco, nao vai existir 2 cpfs com mesmo valores
     protected String cpf;
+
+    @Column(unique = true)
     protected String email;
     protected String senha;
+
+    @ElementCollection(fetch = FetchType.EAGER) // Colecao de elementos do tipo integer e quando der um get, quando
+                                                // buscar essa pessoa la no meu banco, a lista de perfis abaixo tem que
+                                                // vim com usuario. Entao asseguro que minha lista de perfis vai vim com
+                                                // usuario
+                                                // Porque la no front vai ter algumas rotas que dependem do perfil do
+                                                // usuario pra ter acesso
+    @CollectionTable(name = "PERFIS") // Vai vim uma tabelinha no banco apenas com perfis
     protected Set<Integer> perfis = new HashSet<>(); // hashset evita a questao de ponteiro nulo e set também nao vai
                                                      // ter dois valores iguais, permite apenas um unico valor
+
+    @JsonFormat(pattern = "dd/mm/yyyy") // porque eh gerado um valor de acordo com o padrao do BD, entao aqui passo o
+                                        // padrao que desejo
     protected LocalDate dataCriacao = LocalDate.now(); // pega o tempo atual que a instancia foi criada
 
     public Pessoa() {

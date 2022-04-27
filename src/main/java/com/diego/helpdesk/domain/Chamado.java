@@ -1,12 +1,33 @@
 package com.diego.helpdesk.domain;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import com.diego.helpdesk.domain.enums.Prioridade;
 import com.diego.helpdesk.domain.enums.Status;
 
-public class Chamado {
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@Entity
+public class Chamado implements Serializable {
+    // Serializable serve pra criar uma sequencia de bytes para que possam ser
+    // trafegados em rede e armazenados em memoria
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Geracao dessa chave primaria sera do banco, para cada objeto
+                                                        // o banco gera um id diferente
     private Integer id;
+
+    @JsonFormat(pattern = "dd/mm/yyyy") // porque eh gerado um valor de acordo com o padrao do BD, entao aqui passo o
+    // padrao que desejo
     private LocalDate dataAbertura = LocalDate.now();
     private LocalDate dataFechamento = LocalDate.now();
     private Prioridade prioridade;
@@ -14,7 +35,12 @@ public class Chamado {
     private String titulo;
     private String observacoes;
 
+    @ManyToOne // MUITOS Chamados PARA UM Tecnico
+    @JoinColumn(name = "tecnico_id") // Chave primaria no banco da tabela de tecnico
     private Tecnico tecnico;
+
+    @ManyToOne // MUITOS Chamados PARA UM Cliente
+    @JoinColumn(name = "cliente_id") // Chave primaria no banco da tabela de cliente
     private Cliente cliente;
 
     public Chamado() {
